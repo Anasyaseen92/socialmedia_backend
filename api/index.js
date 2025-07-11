@@ -15,7 +15,6 @@ import postRoutes from "../routes/posts.js";
 import { createPost } from "../controller/posts.js";
 import { verifyToken } from "../middleware/auth.js";
 
-// Config
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config();
@@ -30,7 +29,12 @@ app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors());
 app.use("/assets", express.static(path.join(__dirname, "../public/assets")));
 
-// Multer file storage
+// Test route for root URL
+app.get("/", (req, res) => {
+  res.send("✅ Backend is running on Vercel!");
+});
+
+// File storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "public/assets");
@@ -41,24 +45,22 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Routes
 app.post("/auth/register", upload.single("picture"), register);
 app.post("/posts", verifyToken, upload.single("picture"), createPost);
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/posts", postRoutes);
 
-// MongoDB connection
+// Mongo connection
 let isConnected = false;
 
 async function init() {
   if (!isConnected) {
     await mongoose.connect(process.env.MONGO_URL);
     isConnected = true;
-    console.log("✅ MongoDB connected and backend initialized successfully on Vercel");
+    console.log("✅ MongoDB connected on Vercel");
   }
 }
-
 await init();
 
 // Export for Vercel
